@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, {useState} from 'react';
 import { StyleSheet, Text, View, ImageBackground, Pressable, Alert } from 'react-native';
 import bg from './assets/bg.jpeg';
+import Cell from './src/components/Cell';
 
 const emptyMap = [
   ['','',''], // 1st row
@@ -147,27 +148,14 @@ export default function App() {
           {map.map((row, rowIndex) =>(
             <View key={`row-${rowIndex}`} style={styles.row}>
               {row.map((cell, columnIndex) =>(
-                <Pressable key={`row-${rowIndex}-col-${columnIndex}`} onPress={() => onPress(rowIndex,columnIndex)} style={styles.cell}>
-                  {cell === 'o' && <View style={styles.circle} />}
-                  {cell === 'x' && (
-                    <View style={styles.cross}>
-                      <View style={styles.crossLine}/>  
-                      <View style={[styles.crossLine, styles.crossLineReverse]} />
-                  </View>
-                  )}
-                </Pressable>
+                <Cell 
+                  key={`row-${rowIndex}-col-${columnIndex}`}
+                  cell={cell} 
+                  onPress={() => onPress(rowIndex, columnIndex)} 
+                />
               ))}
             </View>
-            
           ))}
-
-
-          {/* <View style={styles.circle} />
-
-          <View style={styles.cross}>
-            <View style={styles.crossLine}/>  
-            <View style={[styles.crossLine, styles.crossLineReverse]} />
-          </View> */}
         </View>
          
       </ImageBackground>
@@ -205,37 +193,5 @@ const styles = StyleSheet.create({
     flex:1,
     flexDirection:'row',
   },
-  cell:{
-    width:100,
-    height:100,
-    flex:1,
-  },
-  circle:{
-    flex:1,
-    width:75,
-    height:75,
-    borderRadius: 50,
-    borderWidth:10,
-    borderColor:'white',
-    margin:10,
-  },
-  cross:{
-    flex:1,
-  },
-  crossLine:{
-    position:'absolute',
-    left:'45%',
-    width:10,
-    height:'100%',
-    backgroundColor:'white',
-    borderRadius:5,
-    transform:[{
-      rotate:'45deg',
-    }],
-  },
-  crossLineReverse:{
-    transform:[{
-      rotate:'-45deg',
-    }],
-  },
+  
 });
