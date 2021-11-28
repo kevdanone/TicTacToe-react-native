@@ -3,12 +3,14 @@ import React, {useState} from 'react';
 import { StyleSheet, Text, View, ImageBackground, Pressable, Alert } from 'react-native';
 import bg from './assets/bg.jpeg';
 
+const emptyMap = [
+  ['','',''], // 1st row
+  ['','',''], // 2nd row
+  ['','',''], // 3rd row
+]
+
 export default function App() {
-  const [map, setMap] = useState([
-    ['','',''], // 1st row
-    ['','',''], // 2nd row
-    ['','',''], // 3rd row
-  ]);
+  const [map, setMap] = useState(emptyMap);
   const [currentTurn,setCurrentTurn] = useState("x");
 
   const onPress= (rowIndex, columnIndex) => {
@@ -23,26 +25,31 @@ export default function App() {
       return updateMap;
     });
 
+    // change player turn 'x -> o' or 'o -> x'
     setCurrentTurn(currentTurn === 'x' ? 'o' : 'x');
-    checkWinningState();
+    const winner =getWinner();
+    if (winner){
+      gameWon(winner)
+    } else {
+      checkTieState();
+    }
   };
 
-  const checkWinningState = () => {
+  const getWinner = () => {
     // check rows
     for (let i = 0; i< 3; i++){
       const isRowXWinning = map[i].every((cell) => cell === 'x');
       const isRowOWinning = map[i].every((cell) => cell === 'o');
 
       if(isRowXWinning){
-        Alert.alert(`X won. Row: ${i}`);
+        return 'X';
       }
       if(isRowOWinning){
-        Alert.alert(`O won. Row: ${i}`);
+        return 'O';
       }
     }
 
     // check columns
-
     for(let col = 0; col < 3; col++){
       let isColumnXWinning = true;
       let isColumnOWinning= true;
@@ -56,18 +63,16 @@ export default function App() {
         }
       }
       
-      // message alert for column winning
       if(isColumnXWinning){
-        Alert.alert(`X won. Col: ${col}`);
+        return 'X';
       }
       if(isColumnOWinning){
-        Alert.alert(`O won. Col: ${col}`);
+       return 'O';
       }
 
     }
 
     // check diagonals
-    
     let isDiagonal1OWinning = true;
     let isDiagonal1XWinning = true;
     let isDiagonal2OWinning = true;
@@ -93,24 +98,51 @@ export default function App() {
     }
 
     // message alert for diagonal winning
-    if (isDiagonal1OWinning){
-      Alert.alert('O won. Diagonal 1');
+    if (isDiagonal1OWinning || isDiagonal2OWinning){
+      return 'O';
+      // Alert.alert('O won. Diagonal');
     }
-    if (isDiagonal1XWinning){
-      Alert.alert('X won. Diagonal 1');
+    if (isDiagonal1XWinning || isDiagonal2XWinning){
+      return 'X'
+      // Alert.alert('X won. Diagonal');
     }
-    if (isDiagonal2OWinning){
-      Alert.alert('O won. Diagonal 2');
-    }
-    if (isDiagonal2XWinning){
-      Alert.alert('X won. Diagonal 2');
-    }
-  } 
+  }; 
 
+  const checkTieState = () => {
+    if(!map.some((row) => row.some((cell) => cell === ""))){
+      Alert.alert(`Too bad`,`it's Tie`, [
+        {
+          text: 'Restart',
+          onPress:resetGame
+        },
+      ]);
+    }
+  };
+
+  const gameWon = (player) => {
+    Alert.alert(`Nice!`, `Player ${player} won`, [
+      {
+        text: 'Restart',
+        onPress:resetGame,
+      },
+    ]);
+  };
+
+  const resetGame = () => {
+    setMap([
+      ['','',''], // 1st row
+      ['','',''], // 2nd row
+      ['','',''], // 3rd row
+    ]);
+    setCurrentTurn("x");
+  }
 
   return (
     <View style={styles.container}>
       <ImageBackground source={bg} style={styles.bg} resizeMode="contain">
+        <Text style={styles.textTurn}>
+          Current Turn : {currentTurn}
+        </Text>
         <View style={styles.map}>
           {map.map((row, rowIndex) =>(
             <View key={`row-${rowIndex}`} style={styles.row}>
@@ -158,6 +190,12 @@ const styles = StyleSheet.create({
     alignItems:'center',
     justifyContent:'center',
     paddingTop:15,
+  },
+  textTurn:{
+    fontSize: 24,
+    color: "white",
+    top: 50,
+    position: "absolute",
   },
   map:{
     width:'80%',
